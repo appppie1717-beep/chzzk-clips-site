@@ -135,7 +135,7 @@ function openPlayer(clip) {
   localPlayer.removeAttribute("src");
 
   if (clip.video) {
-    localPlayer.src = clip.video;
+    localPlayer.src = encodeURI(clip.video);
     localPlayer.hidden = false;
     clipPlayer.hidden = true;
     localPlayer.load();
