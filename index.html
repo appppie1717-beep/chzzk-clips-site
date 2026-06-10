@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chzzk Clip Shelf</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">CHZZK CLIPS</p>
+        <h1>치지직 클립 보관함</h1>
+      </div>
+      <label class="search-box">
+        <span>검색</span>
+        <input id="searchInput" type="search" placeholder="제목, 스트리머, 메모" autocomplete="off" />
+      </label>
+    </header>
+
+    <main>
+      <nav class="category-bar" id="categoryBar" aria-label="클립 카테고리"></nav>
+
+      <section class="status-row">
+        <p id="resultCount">클립을 불러오는 중입니다.</p>
+        <a class="text-link" href="./clips.json" target="_blank" rel="noreferrer">clips.json 열기</a>
+      </section>
+
+      <section class="clip-grid" id="clipGrid" aria-live="polite"></section>
+
+      <section class="empty-state" id="emptyState" hidden>
+        <h2>표시할 클립이 없습니다</h2>
+        <p>카테고리나 검색어를 바꿔보세요.</p>
+      </section>
+    </main>
+
+    <template id="clipCardTemplate">
+      <article class="clip-card">
+        <a class="thumb-link" target="_blank" rel="noreferrer">
+          <img class="thumb" alt="" loading="lazy" />
+          <span class="play-badge">치지직에서 보기</span>
+        </a>
+        <div class="clip-body">
+          <div class="clip-meta">
+            <span class="category-pill"></span>
+            <span class="date-text"></span>
+          </div>
+          <h2 class="clip-title"></h2>
+          <p class="streamer"></p>
+          <p class="memo"></p>
+          <div class="clip-actions">
+            <a class="primary-link" target="_blank" rel="noreferrer">열기</a>
+            <button class="copy-button" type="button">링크 복사</button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
