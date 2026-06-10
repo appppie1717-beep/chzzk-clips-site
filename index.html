@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>드림이 클립</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">DREAM CLIPS</p>
+        <h1>드림이 클립</h1>
+      </div>
+      <label class="search-box">
+        <span>검색</span>
+        <input id="searchInput" type="search" placeholder="제목, 스트리머, 메모" autocomplete="off" />
+      </label>
+    </header>
+
+    <main>
+      <nav class="category-bar" id="categoryBar" aria-label="클립 카테고리"></nav>
+
+      <section class="status-row">
+        <p id="resultCount">클립을 불러오는 중입니다.</p>
+        <a class="text-link" href="./clips.json" target="_blank" rel="noreferrer">clips.json 열기</a>
+      </section>
+
+      <section class="clip-grid" id="clipGrid" aria-live="polite"></section>
+
+      <section class="empty-state" id="emptyState" hidden>
+        <h2>표시할 클립이 없습니다</h2>
+        <p>카테고리나 검색어를 바꿔보세요.</p>
+      </section>
+    </main>
+
+    <section class="player-modal" id="playerModal" hidden>
+      <div class="player-backdrop" data-close-player></div>
+      <article class="player-panel" role="dialog" aria-modal="true" aria-labelledby="playerTitle">
+        <div class="player-head">
+          <div>
+            <p class="player-kicker" id="playerCategory"></p>
+            <h2 id="playerTitle">클립 재생</h2>
+          </div>
+          <button class="close-button" type="button" data-close-player>닫기</button>
+        </div>
+        <div class="player-frame-wrap">
+          <iframe
+            id="clipPlayer"
+            title="치지직 클립 플레이어"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <p class="player-note">
+          치지직이 외부 사이트 재생을 막는 클립은 화면 안에서 안 열릴 수 있습니다.
+          그 경우 아래 버튼으로 치지직에서 바로 보세요.
+        </p>
+        <a class="external-player-link" id="externalPlayerLink" target="_blank" rel="noreferrer">치지직에서 보기</a>
+      </article>
+    </section>
+
+    <template id="clipCardTemplate">
+      <article class="clip-card">
+        <a class="thumb-link" target="_blank" rel="noreferrer">
+          <img class="thumb" alt="" loading="lazy" />
+          <span class="play-badge">치지직에서 보기</span>
+        </a>
+        <div class="clip-body">
+          <div class="clip-meta">
+            <span class="category-pill"></span>
+            <span class="date-text"></span>
+          </div>
+          <h2 class="clip-title"></h2>
+          <p class="streamer"></p>
+          <p class="memo"></p>
+          <div class="clip-actions">
+            <button class="primary-link play-button" type="button">사이트에서 재생</button>
+            <a class="secondary-link" target="_blank" rel="noreferrer">치지직</a>
+            <button class="copy-button" type="button">링크 복사</button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
