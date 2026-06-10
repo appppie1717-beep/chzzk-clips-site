@@ -1,17 +1,18 @@
 const state = {
   clips: [],
-  activeCategory: "전체",
-  searchText: "",
+  activeCategory: "",
 };
 
 const categoryBar = document.querySelector("#categoryBar");
+const categoryGrid = document.querySelector("#categoryGrid");
 const clipGrid = document.querySelector("#clipGrid");
+const clipsPanel = document.querySelector("#clipsPanel");
 const emptyState = document.querySelector("#emptyState");
 const resultCount = document.querySelector("#resultCount");
-const searchInput = document.querySelector("#searchInput");
 const template = document.querySelector("#clipCardTemplate");
 const playerModal = document.querySelector("#playerModal");
 const clipPlayer = document.querySelector("#clipPlayer");
+const localPlayer = document.querySelector("#localPlayer");
 const playerTitle = document.querySelector("#playerTitle");
 const playerCategory = document.querySelector("#playerCategory");
 const externalPlayerLink = document.querySelector("#externalPlayerLink");
@@ -41,13 +42,9 @@ async function init() {
     resultCount.textContent = "clips.json을 불러오지 못해 샘플을 표시합니다.";
   }
 
+  state.activeCategory = "";
   renderCategories();
   renderClips();
-
-  searchInput.addEventListener("input", (event) => {
-    state.searchText = event.target.value.trim().toLowerCase();
-    renderClips();
-  });
 
   document.querySelectorAll("[data-close-player]").forEach((element) => {
     element.addEventListener("click", closePlayer);
@@ -59,10 +56,13 @@ async function init() {
 }
 
 function renderCategories() {
-  const categories = ["전체", ...new Set(state.clips.map((clip) => clip.category || "미분류"))];
+  const categories = [...new Set(state.clips.map((clip) => clip.category || "미분류"))];
   categoryBar.innerHTML = "";
+  categoryGrid.innerHTML = "";
 
   categories.forEach((category) => {
+    const count = state.clips.filter((clip) => (clip.category || "미분류") === category).length;
+
     const button = document.createElement("button");
     button.className = "category-button";
     button.type = "button";
@@ -74,12 +74,34 @@ function renderCategories() {
       renderClips();
     });
     categoryBar.append(button);
+
+    const card = document.createElement("button");
+    card.className = "category-card";
+    card.type = "button";
+    card.setAttribute("aria-pressed", String(category === state.activeCategory));
+    card.innerHTML = `<strong>${category}</strong><span>${count}개 클립 보기</span>`;
+    card.addEventListener("click", () => {
+      state.activeCategory = category;
+      renderCategories();
+      renderClips();
+      clipGrid.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    categoryGrid.append(card);
   });
 }
 
 function renderClips() {
   const clips = getFilteredClips();
   clipGrid.innerHTML = "";
+
+  if (!state.activeCategory) {
+    emptyState.hidden = true;
+    clipsPanel.classList.remove("is-open");
+    resultCount.textContent = `카테고리 ${categoryGrid.children.length}개 중 하나를 선택하세요.`;
+    return;
+  }
+
+  clipsPanel.classList.add("is-open");
   emptyState.hidden = clips.length > 0;
   resultCount.textContent = `${state.activeCategory} 카테고리에서 ${clips.length}개 클립을 표시 중입니다.`;
 
@@ -87,38 +109,15 @@ function renderClips() {
     const card = template.content.firstElementChild.cloneNode(true);
     const url = clip.url || "#";
 
-    const thumbLink = card.querySelector(".thumb-link");
+    const clipOpen = card.querySelector(".clip-open");
     const thumb = card.querySelector(".thumb");
-    const category = card.querySelector(".category-pill");
-    const date = card.querySelector(".date-text");
-    const title = card.querySelector(".clip-title");
-    const streamer = card.querySelector(".streamer");
-    const memo = card.querySelector(".memo");
-    const playButton = card.querySelector(".play-button");
-    const openLink = card.querySelector(".secondary-link");
-    const copyButton = card.querySelector(".copy-button");
 
-    thumbLink.href = url;
     thumb.src = clip.thumbnail || "";
-    thumb.alt = clip.title ? `${clip.title} 썸네일` : "클립 썸네일";
-    category.textContent = clip.category || "미분류";
-    date.textContent = clip.date || "";
-    title.textContent = clip.title || "제목 없는 클립";
-    streamer.textContent = clip.streamer ? `방송인: ${clip.streamer}` : "";
-    memo.textContent = clip.memo || "";
-    openLink.href = url;
-    openLink.textContent = "치지직";
+    thumb.alt = "";
+    clipOpen.setAttribute("aria-label", clip.title || "클립 열기");
 
-    playButton.addEventListener("click", () => {
+    clipOpen.addEventListener("click", () => {
       openPlayer(clip);
-    });
-
-    copyButton.addEventListener("click", async () => {
-      await copyToClipboard(url);
-      copyButton.textContent = "복사됨";
-      window.setTimeout(() => {
-        copyButton.textContent = "링크 복사";
-      }, 1200);
     });
 
     clipGrid.append(card);
@@ -130,7 +129,25 @@ function openPlayer(clip) {
   playerTitle.textContent = clip.title || "제목 없는 클립";
   playerCategory.textContent = clip.category || "미분류";
   externalPlayerLink.href = url;
-  clipPlayer.src = clip.embedUrl || url;
+
+  clipPlayer.src = "about:blank";
+  localPlayer.pause();
+  localPlayer.removeAttribute("src");
+
+  if (clip.video) {
+    localPlayer.src = clip.video;
+    localPlayer.hidden = false;
+    clipPlayer.hidden = true;
+    localPlayer.load();
+  } else if (clip.embedUrl) {
+    clipPlayer.src = clip.embedUrl;
+    localPlayer.hidden = true;
+    clipPlayer.hidden = false;
+  } else {
+    window.open(url, "_blank", "noopener,noreferrer");
+    return;
+  }
+
   playerModal.hidden = false;
   document.body.style.overflow = "hidden";
 }
@@ -138,31 +155,16 @@ function openPlayer(clip) {
 function closePlayer() {
   if (playerModal.hidden) return;
   playerModal.hidden = true;
+  localPlayer.pause();
+  localPlayer.removeAttribute("src");
   clipPlayer.src = "about:blank";
   document.body.style.overflow = "";
 }
 
 function getFilteredClips() {
+  if (!state.activeCategory) return [];
+
   return state.clips.filter((clip) => {
-    const categoryMatch = state.activeCategory === "전체" || (clip.category || "미분류") === state.activeCategory;
-    const haystack = [clip.title, clip.streamer, clip.memo, clip.category].join(" ").toLowerCase();
-    const searchMatch = !state.searchText || haystack.includes(state.searchText);
-    return categoryMatch && searchMatch;
+    return (clip.category || "미분류") === state.activeCategory;
   });
-}
-
-async function copyToClipboard(text) {
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  document.body.append(textarea);
-  textarea.select();
-  document.execCommand("copy");
-  textarea.remove();
 }
