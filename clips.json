@@ -1,0 +1,20 @@
+[
+  {
+    "title": "샘플 클립 A",
+    "category": "A",
+    "url": "https://chzzk.naver.com/",
+    "thumbnail": "",
+    "streamer": "스트리머 이름",
+    "date": "2026-06-10",
+    "memo": "여기에 실제 클립 설명을 적으세요."
+  },
+  {
+    "title": "샘플 클립 B",
+    "category": "B",
+    "url": "https://chzzk.naver.com/",
+    "thumbnail": "",
+    "streamer": "스트리머 이름",
+    "date": "2026-06-10",
+    "memo": "B 카테고리 예시입니다."
+  }
+]
