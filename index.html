@@ -11,6 +11,9 @@
       <div class="brand-block">
         <p class="eyebrow">DREAM CLIPS</p>
         <h1>드림이 클립</h1>
+        <a class="stream-link" href="https://chzzk.naver.com/0a468870e987405cbc55091d5756f355" target="_blank" rel="noreferrer">
+          드림이 방송 바로가기
+        </a>
       </div>
     </header>
 
@@ -32,6 +35,8 @@
         <p>카테고리나 검색어를 바꿔보세요.</p>
       </section>
     </main>
+
+    <footer class="site-footer">애플파이 - asoul122@naver.com</footer>
 
     <section class="player-modal" id="playerModal" hidden>
       <div class="player-backdrop" data-close-player></div>
@@ -64,8 +69,9 @@
     <template id="clipCardTemplate">
       <article class="clip-card">
         <button class="clip-open" type="button">
-          <img class="thumb" alt="" loading="lazy" />
+          <video class="thumb-video" muted preload="metadata" playsinline></video>
         </button>
+        <p class="clip-label"></p>
       </article>
     </template>
 

@@ -57,6 +57,19 @@ h1 {
   letter-spacing: 0;
 }
 
+.stream-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: var(--accent-dark);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.stream-link:hover {
+  text-decoration: underline;
+}
+
 main {
   width: min(1240px, calc(100% - 32px));
   margin: 0 auto;
@@ -186,7 +199,6 @@ main {
 }
 
 .clip-card {
-  overflow: hidden;
   border-radius: 8px;
   animation: slideIn 260ms ease both;
 }
@@ -240,15 +252,11 @@ main {
   transform: translate(-35%, -50%);
 }
 
-.thumb {
+.thumb-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-.thumb[src=""] {
-  display: none;
 }
 
 .primary-link {
@@ -280,6 +288,24 @@ main {
 
 .copy-button {
   flex: 0 0 auto;
+}
+
+.clip-label {
+  margin: 7px 2px 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.site-footer {
+  padding: 20px 16px 28px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
 }
 
 @keyframes slideIn {

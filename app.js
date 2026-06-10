@@ -110,10 +110,11 @@ function renderClips() {
     const url = clip.url || "#";
 
     const clipOpen = card.querySelector(".clip-open");
-    const thumb = card.querySelector(".thumb");
+    const thumbVideo = card.querySelector(".thumb-video");
+    const clipLabel = card.querySelector(".clip-label");
 
-    thumb.src = clip.thumbnail || "";
-    thumb.alt = "";
+    thumbVideo.src = clip.video ? `${encodeURI(clip.video)}#t=0.1` : "";
+    clipLabel.textContent = clip.title || "";
     clipOpen.setAttribute("aria-label", clip.title || "클립 열기");
 
     clipOpen.addEventListener("click", () => {
