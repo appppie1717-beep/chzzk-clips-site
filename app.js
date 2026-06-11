@@ -16,6 +16,8 @@ const localPlayer = document.querySelector("#localPlayer");
 const playerTitle = document.querySelector("#playerTitle");
 const playerCategory = document.querySelector("#playerCategory");
 const externalPlayerLink = document.querySelector("#externalPlayerLink");
+const streamLink = document.querySelector(".stream-link");
+const liveBadge = document.querySelector("#liveBadge");
 
 const fallbackClips = [
   {
@@ -32,6 +34,9 @@ const fallbackClips = [
 init();
 
 async function init() {
+  updateLiveStatus();
+  window.setInterval(updateLiveStatus, 60000);
+
   try {
     const response = await fetch("./clips.json", { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -53,6 +58,28 @@ async function init() {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closePlayer();
   });
+}
+
+async function updateLiveStatus() {
+  if (!streamLink || !liveBadge) return;
+
+  try {
+    const response = await fetch("./api/live-status", { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const status = await response.json();
+    setLiveStatus(Boolean(status.live));
+  } catch (error) {
+    setLiveStatus(false);
+  }
+}
+
+function setLiveStatus(isLive) {
+  streamLink.classList.toggle("is-live", isLive);
+  streamLink.setAttribute(
+    "aria-label",
+    isLive ? "드림이 방송 바로가기, 현재 방송 중" : "드림이 방송 바로가기"
+  );
+  liveBadge.hidden = !isLive;
 }
 
 function renderCategories() {
