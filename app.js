@@ -41,6 +41,7 @@ const rankingList = document.querySelector("#rankingList");
 const startGameButton = document.querySelector("#startGameButton");
 const refreshRankingButton = document.querySelector("#refreshRankingButton");
 const themeChoices = document.querySelectorAll("[data-theme-choice]");
+const popularityEntry = document.querySelector("#popularityEntry");
 
 const fallbackClips = [
   {
@@ -102,6 +103,7 @@ function bindEvents() {
 
   startGameButton.addEventListener("click", startTournament);
   refreshRankingButton.addEventListener("click", loadAndRenderRankings);
+  popularityEntry.addEventListener("click", openPopularityPanel);
 }
 
 function initTheme() {
@@ -146,22 +148,6 @@ function renderCategories() {
   categoryBar.innerHTML = "";
   categoryGrid.innerHTML = "";
 
-  if (categories.includes(POPULARITY_CATEGORY)) {
-    const popularityCard = document.createElement("button");
-    popularityCard.className = "category-card is-popularity";
-    popularityCard.type = "button";
-    popularityCard.setAttribute("aria-pressed", String(state.activeMode === "popularity"));
-    popularityCard.innerHTML = `<strong>인기순위</strong><span>${POPULARITY_CATEGORY} 클립 순위 보기</span>`;
-    popularityCard.addEventListener("click", () => {
-      state.activeCategory = POPULARITY_CATEGORY;
-      state.activeMode = "popularity";
-      renderCategories();
-      renderMainPanel();
-      clipsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-    categoryGrid.append(popularityCard);
-  }
-
   categories.forEach((category) => {
     const count = state.clips.filter((clip) => (clip.category || "미분류") === category).length;
 
@@ -194,6 +180,16 @@ function renderCategories() {
     });
     categoryGrid.append(card);
   });
+
+  popularityEntry.setAttribute("aria-pressed", String(state.activeMode === "popularity"));
+}
+
+function openPopularityPanel() {
+  state.activeCategory = POPULARITY_CATEGORY;
+  state.activeMode = "popularity";
+  renderCategories();
+  renderMainPanel();
+  clipsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function renderMainPanel() {
