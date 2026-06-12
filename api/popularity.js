@@ -3,6 +3,10 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 const TABLE_NAME = "clip_popularity_results";
 const DEFAULT_GAME_KEY = "aegyo";
+const POPULARITY_CATEGORY = "애교";
+const clips = require("../clips.json");
+const allowedClips = clips.filter((clip) => clip.category === POPULARITY_CATEGORY);
+const allowedClipByKey = new Map(allowedClips.map((clip) => [getClipKey(clip), clip]));
 
 module.exports = async function handler(request, response) {
   setJsonHeaders(response);
@@ -62,24 +66,14 @@ async function handlePost(request, response) {
   const tournamentId = body.tournamentId;
   const results = Array.isArray(body.results) ? body.results : [];
 
-  if (!isUuid(tournamentId) || gameKey !== DEFAULT_GAME_KEY || results.length === 0 || results.length > 14) {
+  if (!isUuid(tournamentId) || gameKey !== DEFAULT_GAME_KEY || results.length !== allowedClips.length) {
     response.status(400).json({ error: "Invalid popularity result payload" });
     return;
   }
 
   let rows;
   try {
-    rows = results.map((result) => ({
-      game_key: gameKey,
-      tournament_id: tournamentId,
-      clip_key: requireText(result.clipKey, "clipKey"),
-      clip_title: requireText(result.clipTitle, "clipTitle"),
-      clip_url: normalizeText(result.clipUrl),
-      video_path: normalizeText(result.videoPath),
-      category: normalizeText(result.category) || "애교",
-      placement: requirePlacement(result.placement),
-      points: requirePoints(result.points)
-    }));
+    rows = normalizeResults(gameKey, tournamentId, results);
   } catch (error) {
     response.status(400).json({ error: "Invalid popularity result item" });
     return;
@@ -154,10 +148,40 @@ function mapRankingRow(row) {
   };
 }
 
-function requireText(value, fieldName) {
-  const normalized = normalizeText(value);
-  if (!normalized) throw new Error(`Missing ${fieldName}`);
-  return normalized.slice(0, 500);
+function normalizeResults(gameKey, tournamentId, results) {
+  const seenKeys = new Set();
+  const seenPlacements = new Set();
+
+  const rows = results.map((result) => {
+    const clipKey = normalizeText(result.clipKey);
+    const placement = requirePlacement(result.placement);
+    const clip = allowedClipByKey.get(clipKey);
+
+    if (!clip || seenKeys.has(clipKey) || seenPlacements.has(placement)) {
+      throw new Error("Invalid tournament result");
+    }
+
+    seenKeys.add(clipKey);
+    seenPlacements.add(placement);
+
+    return {
+      game_key: gameKey,
+      tournament_id: tournamentId,
+      clip_key: clipKey,
+      clip_title: clip.title || "제목 없는 클립",
+      clip_url: clip.url || "",
+      video_path: clip.video || "",
+      category: clip.category || POPULARITY_CATEGORY,
+      placement,
+      points: pointsForPlacement(placement)
+    };
+  });
+
+  if (seenKeys.size !== allowedClips.length || seenPlacements.size !== allowedClips.length) {
+    throw new Error("Incomplete tournament result");
+  }
+
+  return rows;
 }
 
 function normalizeText(value) {
@@ -172,14 +196,14 @@ function requirePlacement(value) {
   return placement;
 }
 
-function requirePoints(value) {
-  const points = Number(value);
-  if (!Number.isInteger(points) || points < 0 || points > 14) {
-    throw new Error("Invalid points");
-  }
-  return points;
+function pointsForPlacement(placement) {
+  return Math.max(15 - placement, 1);
 }
 
 function isUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(value || ""));
+}
+
+function getClipKey(clip) {
+  return clip.url || clip.video || clip.title || "";
 }

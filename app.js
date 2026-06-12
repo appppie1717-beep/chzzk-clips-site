@@ -221,7 +221,7 @@ function renderClips() {
   if (!state.activeCategory) {
     emptyState.hidden = true;
     clipsPanel.classList.remove("is-open");
-    resultCount.textContent = `카테고리 ${categoryGrid.children.length - 1}개 중 하나를 선택하세요.`;
+    resultCount.textContent = `카테고리 ${getCategoryCount()}개 중 하나를 선택하세요.`;
     return;
   }
 
@@ -377,7 +377,12 @@ async function finishTournament(tournament) {
 
   const saved = await submitTournamentResults(tournament.id, results);
   if (!saved) saveLocalResults(results);
-  await loadRankings();
+  if (saved) {
+    await loadRankings();
+  } else {
+    state.ranking = getLocalRanking();
+    state.rankingSource = "local";
+  }
 
   state.popularityMode = "ranking";
   state.tournament = null;
@@ -593,6 +598,10 @@ function getFilteredClips() {
 
 function getAegyoClips() {
   return state.clips.filter((clip) => (clip.category || "미분류") === POPULARITY_CATEGORY);
+}
+
+function getCategoryCount() {
+  return new Set(state.clips.map((clip) => clip.category || "미분류")).size;
 }
 
 function getClipKey(clip) {
