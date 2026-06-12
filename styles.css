@@ -734,20 +734,36 @@ main {
 }
 
 .game-progress {
-  display: flex;
+  display: grid;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-items: center;
+  gap: 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 12px 14px;
-  background: var(--panel);
+  padding: 16px 14px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, transparent), transparent),
+    var(--panel);
   color: var(--muted);
+  text-align: center;
 }
 
 .game-progress strong {
   color: var(--accent-dark);
-  font-size: 18px;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.game-progress span {
+  display: inline-grid;
+  place-items: center;
+  min-height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 10px;
+  background: color-mix(in srgb, var(--panel) 82%, var(--bg));
+  font-size: 12px;
+  font-weight: 900;
 }
 
 .match-board {
@@ -763,7 +779,6 @@ main {
   padding: 12px;
   background: var(--panel);
   box-shadow: var(--shadow);
-  cursor: pointer;
   text-align: left;
   transition:
     transform 180ms ease,
@@ -778,13 +793,50 @@ main {
   transform: translateY(-4px);
 }
 
-.match-card video {
+.match-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #101418;
+}
+
+.match-media video {
   display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 8px;
   background: #101418;
+  cursor: pointer;
   object-fit: cover;
+}
+
+.match-play {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  min-width: 74px;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  padding: 0 16px;
+  background: rgba(16, 20, 24, 0.78);
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  transition:
+    background-color 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.match-play:hover {
+  background: rgba(0, 196, 113, 0.92);
+  transform: translate(-50%, -50%) scale(1.04);
+}
+
+.match-card.is-playing .match-play {
+  opacity: 0.72;
 }
 
 .match-card strong {
@@ -796,6 +848,26 @@ main {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.match-select {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.match-select:hover {
+  transform: translateY(-2px);
 }
 
 .ranking-head {

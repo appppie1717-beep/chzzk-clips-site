@@ -301,7 +301,6 @@ function renderTournament() {
     matchLabel.textContent = "최종 선택 완료";
     matchBoard.innerHTML = "";
     const championCard = createMatchCard(state.tournament.champion, "최종 1위");
-    championCard.addEventListener("click", () => openPlayer(state.tournament.champion));
     matchBoard.append(championCard);
     return;
   }
@@ -312,22 +311,83 @@ function renderTournament() {
   matchBoard.innerHTML = "";
 
   match.forEach((clip) => {
-    const card = createMatchCard(clip, "선택하기");
-    card.addEventListener("click", () => chooseTournamentWinner(clip));
-    matchBoard.append(card);
+    matchBoard.append(createMatchCard(clip, "이 영상 선택", () => chooseTournamentWinner(clip)));
   });
 }
 
-function createMatchCard(clip, actionText) {
-  const card = document.createElement("button");
+function createMatchCard(clip, actionText, onChoose) {
+  const title = clip.title || "제목 없는 클립";
+  const card = document.createElement("article");
   card.className = "match-card";
-  card.type = "button";
-  card.innerHTML = `
-    <video muted preload="metadata" playsinline src="${clip.video ? `${encodeURI(clip.video)}#t=0.1` : ""}"></video>
-    <strong>${escapeHtml(clip.title || "제목 없는 클립")}</strong>
-  `;
-  card.setAttribute("aria-label", `${clip.title || "클립"} ${actionText}`);
+  card.setAttribute("aria-label", `${title} 후보`);
+
+  const media = document.createElement("div");
+  media.className = "match-media";
+
+  const video = document.createElement("video");
+  video.preload = "metadata";
+  video.playsInline = true;
+  video.src = clip.video ? `${encodeURI(clip.video)}#t=0.1` : "";
+
+  const playButton = document.createElement("button");
+  playButton.className = "match-play";
+  playButton.type = "button";
+  playButton.textContent = "재생";
+  playButton.setAttribute("aria-label", `${title} 재생`);
+
+  playButton.addEventListener("click", () => toggleInlineVideo(video, playButton));
+  video.addEventListener("click", () => toggleInlineVideo(video, playButton));
+  video.addEventListener("play", () => {
+    card.classList.add("is-playing");
+    playButton.textContent = "일시정지";
+    playButton.setAttribute("aria-label", `${title} 일시정지`);
+  });
+  video.addEventListener("pause", () => {
+    card.classList.remove("is-playing");
+    playButton.textContent = video.currentTime > 0 ? "재생" : "재생";
+    playButton.setAttribute("aria-label", `${title} 재생`);
+  });
+  video.addEventListener("ended", () => {
+    card.classList.remove("is-playing");
+    playButton.textContent = "다시 재생";
+    playButton.setAttribute("aria-label", `${title} 다시 재생`);
+  });
+
+  media.append(video, playButton);
+
+  const titleElement = document.createElement("strong");
+  titleElement.textContent = title;
+
+  card.append(media, titleElement);
+
+  if (onChoose) {
+    const chooseButton = document.createElement("button");
+    chooseButton.className = "match-select";
+    chooseButton.type = "button";
+    chooseButton.textContent = actionText;
+    chooseButton.setAttribute("aria-label", `${title} 선택`);
+    chooseButton.addEventListener("click", onChoose);
+    card.append(chooseButton);
+  }
+
   return card;
+}
+
+function toggleInlineVideo(video, button) {
+  document.querySelectorAll(".match-media video").forEach((otherVideo) => {
+    if (otherVideo !== video) otherVideo.pause();
+  });
+
+  if (video.paused) {
+    video.play().catch(() => {
+      button.textContent = "재생 실패";
+      window.setTimeout(() => {
+        button.textContent = "재생";
+      }, 1200);
+    });
+  } else {
+    video.pause();
+  }
 }
 
 async function chooseTournamentWinner(winnerClip) {
