@@ -4,10 +4,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>드림이 클립</title>
+    <script>
+      const savedTheme = localStorage.getItem("dreamClipsTheme");
+      document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
+    </script>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <header class="app-header">
+      <div class="header-actions" aria-label="화면 테마 선택">
+        <div class="theme-switcher" role="group" aria-label="다크모드 라이트모드 선택">
+          <button class="theme-choice" type="button" data-theme-choice="light" aria-pressed="true">라이트</button>
+          <button class="theme-choice" type="button" data-theme-choice="dark" aria-pressed="false">다크</button>
+        </div>
+      </div>
       <div class="brand-block">
         <p class="eyebrow">DREAM CLIPS</p>
         <h1>드림이 클립</h1>
@@ -32,6 +42,39 @@
           <div class="status-row">
             <p id="resultCount">카테고리를 선택하세요.</p>
           </div>
+          <section class="popularity-panel" id="popularityPanel" hidden>
+            <div class="popularity-mode-tabs" role="tablist" aria-label="인기순위 선택">
+              <button class="mode-tab" type="button" data-popularity-mode="game" role="tab" aria-selected="true">
+                인기순위 게임
+              </button>
+              <button class="mode-tab" type="button" data-popularity-mode="ranking" role="tab" aria-selected="false">
+                인기순위 랭킹
+              </button>
+            </div>
+
+            <section class="popularity-view is-active" id="gameView">
+              <div class="game-intro" id="gameIntro">
+                <h2>애교 인기순위 정하기</h2>
+                <p>무작위로 나온 두 클립 중 더 좋은 쪽을 골라 최종 1개를 정합니다.</p>
+                <button class="primary-action" type="button" id="startGameButton">인기순위 정하기</button>
+              </div>
+              <div class="tournament-stage" id="tournamentStage" hidden>
+                <div class="game-progress">
+                  <strong id="roundLabel">14강</strong>
+                  <span id="matchLabel">1 / 6</span>
+                </div>
+                <div class="match-board" id="matchBoard"></div>
+              </div>
+            </section>
+
+            <section class="popularity-view" id="rankingView">
+              <div class="ranking-head">
+                <h2>전체 인기순위</h2>
+                <button class="secondary-action" type="button" id="refreshRankingButton">새로고침</button>
+              </div>
+              <ol class="ranking-list" id="rankingList"></ol>
+            </section>
+          </section>
           <section class="clip-grid" id="clipGrid" aria-live="polite"></section>
         </section>
       </section>

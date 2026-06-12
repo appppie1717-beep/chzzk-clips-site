@@ -46,3 +46,19 @@ http://localhost:8765
 - 카테고리를 누르면 오른쪽 영역에 해당 카테고리의 클립 카드가 표시됩니다.
 - 치지직 링크만 있는 클립은 치지직 사이트로 열립니다.
 - 영상 파일을 직접 넣은 클립은 사이트 안 플레이어로 재생됩니다.
+
+## 인기순위 저장 설정
+
+애교 인기순위 게임 결과를 모든 유저 기준으로 모으려면 Supabase와 Vercel 환경변수가 필요합니다.
+
+1. Supabase SQL Editor에서 `SUPABASE_SQL.md` 내용을 실행합니다.
+2. Vercel 프로젝트 환경변수에 아래 값을 추가합니다.
+
+```text
+SUPABASE_URL=https://pkcirbldvybzjmclgyie.supabase.co
+SUPABASE_SECRET_KEY=Supabase Secret key
+```
+
+`SUPABASE_SECRET_KEY`는 GitHub에 올리면 안 됩니다. Vercel 환경변수에만 넣으세요.
+
+환경변수가 없으면 사이트는 깨지지 않고, 인기순위는 현재 브라우저의 임시 저장값으로만 표시됩니다.
